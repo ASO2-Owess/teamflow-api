@@ -1,0 +1,171 @@
+openapi: 3.0.3
+info:
+  title: TeamFlow API
+  description: >
+    API REST de gestion d'équipes et de tâches, avec authentification par
+    jeton (Laravel Sanctum) et contrôle d'accès basé sur les rôles
+    (admin / manager / member) propre à chaque équipe.
+  version: 1.0.0
+  contact:
+    name: Akpa Salomon Owess
+    email: owesssalomon08@gmail.com
+    url: https://aso2-owess.github.io/portfolio-owess/
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local (Docker)
+
+tags:
+  - name: Auth
+  - name: Teams
+  - name: Tasks
+
+paths:
+  /register:
+    post:
+      tags: [Auth]
+      summary: Créer un compte et recevoir un jeton d'accès
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, password_confirmation]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+                password_confirmation: { type: string, format: password }
+      responses:
+        '201': { description: Compte créé }
+        '422': { description: Erreur de validation }
+
+  /login:
+    post:
+      tags: [Auth]
+      summary: Se connecter et recevoir un jeton d'accès
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+      responses:
+        '200': { description: Connecté }
+        '422': { description: Identifiants invalides }
+
+  /me:
+    get:
+      tags: [Auth]
+      summary: Utilisateur authentifié
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: OK }
+        '401': { description: Non authentifié }
+
+  /teams:
+    get:
+      tags: [Teams]
+      summary: Lister les équipes de l'utilisateur authentifié
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: OK }
+    post:
+      tags: [Teams]
+      summary: Créer une équipe (l'utilisateur en devient admin)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+      responses:
+        '201': { description: Créée }
+
+  /teams/{team}/members:
+    post:
+      tags: [Teams]
+      summary: Ajouter un membre (réservé admin/manager)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: team, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, role]
+              properties:
+                user_id: { type: integer }
+                role: { type: string, enum: [admin, manager, member] }
+      responses:
+        '200': { description: Membre ajouté }
+        '403': { description: Rôle insuffisant }
+
+  /teams/{team}/tasks:
+    get:
+      tags: [Tasks]
+      summary: Lister les tâches d'une équipe (filtrable par statut)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: team, in: path, required: true, schema: { type: integer } }
+        - { name: status, in: query, required: false, schema: { type: string, enum: [todo, in_progress, done] } }
+      responses:
+        '200': { description: OK }
+    post:
+      tags: [Tasks]
+      summary: Créer une tâche dans l'équipe
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: team, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title: { type: string }
+                description: { type: string }
+                priority: { type: string, enum: [low, medium, high] }
+                due_date: { type: string, format: date }
+                assigned_to: { type: integer }
+      responses:
+        '201': { description: Créée }
+
+  /tasks/{task}:
+    patch:
+      tags: [Tasks]
+      summary: Modifier une tâche (admin/manager, ou membre si assignée)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: task, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Modifiée }
+        '403': { description: Non autorisé }
+    delete:
+      tags: [Tasks]
+      summary: Supprimer une tâche (réservé admin/manager)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: task, in: path, required: true, schema: { type: integer } }
+      responses:
+        '204': { description: Supprimée }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum token
