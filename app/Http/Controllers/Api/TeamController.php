@@ -13,7 +13,7 @@ class TeamController extends Controller
 {
     public function index(Request $request)
     {
-        $teams = $request->user()->teams()->with('owner')->withCount('members')->get();
+        $teams = $request->user()->teams()->with(['owner', 'members'])->withCount('members')->get();
 
         return TeamResource::collection($teams);
     }

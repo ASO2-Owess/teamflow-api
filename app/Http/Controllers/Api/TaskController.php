@@ -31,6 +31,8 @@ class TaskController extends Controller
 
         $task = $team->tasks()->create([
             ...$request->validated(),
+            'status' => $request->validated('status', 'todo'),
+            'priority' => $request->validated('priority', 'medium'),
             'created_by' => $request->user()->id,
         ]);
 

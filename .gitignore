@@ -1,5 +1,6 @@
 /.phpunit.cache
 /node_modules
+/database/*.sqlite
 /public/build
 /public/hot
 /public/storage
@@ -21,3 +22,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/captures_dEcrans/
+/storage/framework/lsp-*.php
+/tsconfig.tsbuildinfo

@@ -26,6 +26,7 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   due_date: string | null;
+  assigned_to?: number | null;
   assignee?: User | null;
   created_by?: User;
   created_at: string;

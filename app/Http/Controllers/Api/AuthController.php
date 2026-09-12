@@ -45,7 +45,7 @@ class AuthController extends Controller
 
         if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ["Identifiants incorrects."],
+                'email' => ['Identifiants incorrects.'],
             ]);
         }
 
@@ -66,6 +66,6 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        return new UserResource($request->user());
+        return response()->json((new UserResource($request->user()))->resolve($request));
     }
 }

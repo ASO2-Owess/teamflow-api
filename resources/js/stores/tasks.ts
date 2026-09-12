@@ -17,8 +17,8 @@ export const useTasksStore = defineStore("tasks", () => {
     }
   }
 
-  async function createTask(teamId: number, title: string): Promise<void> {
-    const { data } = await api.post<{ data: Task }>(`/teams/${teamId}/tasks`, { title });
+  async function createTask(teamId: number, title: string, assignedTo?: number | null): Promise<void> {
+    const { data } = await api.post<{ data: Task }>(`/teams/${teamId}/tasks`, { title, assigned_to: assignedTo || null });
     tasks.value.unshift(data.data);
   }
 
