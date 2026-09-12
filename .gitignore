@@ -22,6 +22,5 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
-/captures_dEcrans/
 /storage/framework/lsp-*.php
 /tsconfig.tsbuildinfo
